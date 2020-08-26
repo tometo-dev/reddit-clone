@@ -3,6 +3,7 @@ import { cacheExchange, QueryInput, Cache } from "@urql/exchange-graphcache"
 import { createClient, dedupExchange, fetchExchange, Provider } from "urql"
 import {
   LoginMutation,
+  LogoutMutation,
   MeDocument,
   MeQuery,
   RegisterMutation,
@@ -59,6 +60,16 @@ const client = createClient({
                   }
                 }
               }
+            )
+          },
+          logout: (_result, args, cache, info) => {
+            customUpdateQuery<LogoutMutation, MeQuery>(
+              cache,
+              { query: MeDocument },
+              _result,
+              () => ({
+                me: null,
+              })
             )
           },
         },
