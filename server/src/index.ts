@@ -1,4 +1,3 @@
-import { MikroORM } from "@mikro-orm/core"
 import { ApolloServer } from "apollo-server-express"
 import connectRedis from "connect-redis"
 import cors from "cors"
@@ -8,15 +7,28 @@ import Redis from "ioredis"
 import "reflect-metadata"
 import { buildSchema } from "type-graphql"
 import { COOKIE_NAME } from "./constants"
-import mikroConfig from "./mikro-orm.config"
 import { HelloResolver } from "./resolvers/hello"
 import { PostResolver } from "./resolvers/posts"
 import { UserResolver } from "./resolvers/user"
 import { MyContext } from "./types"
+import { createConnection } from "typeorm"
+import { User } from "./entities/User"
+import { Post } from "./entities/Post"
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const main = async () => {
-  const orm = await MikroORM.init(mikroConfig)
-  await orm.getMigrator().up()
+  await createConnection({
+    type: "postgres",
+    database: process.env.POSTGRES_DB,
+    username: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    host: process.env.POSTGRES_HOST,
+    logging: true,
+    synchronize: true,
+    entities: [User, Post],
+  })
 
   const app = express()
 
@@ -54,7 +66,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): MyContext => ({ em: orm.em, req, res, redis }),
+    context: ({ req, res }): MyContext => ({ req, res, redis }),
   })
 
   apolloServer.applyMiddleware({
