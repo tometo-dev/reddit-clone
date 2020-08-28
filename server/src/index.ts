@@ -15,6 +15,7 @@ import { createConnection } from "typeorm"
 import { User } from "./entities/User"
 import { Post } from "./entities/Post"
 import dotenv from "dotenv"
+import { Updoot } from "./entities/Updoot"
 
 dotenv.config()
 
@@ -27,7 +28,7 @@ const main = async () => {
     host: process.env.POSTGRES_HOST,
     logging: true,
     synchronize: true,
-    entities: [User, Post],
+    entities: [User, Post, Updoot],
   })
 
   const app = express()

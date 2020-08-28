@@ -1,4 +1,3 @@
-import { MyContext } from "../types"
 import {
   Arg,
   Ctx,
@@ -11,11 +10,12 @@ import {
   Query,
   Resolver,
   Root,
-  UseMiddleware,
+  UseMiddleware
 } from "type-graphql"
+import { getConnection } from "typeorm"
 import { Post } from "../entities/Post"
 import { isAuth } from "../middlewares/is-auth"
-import { getConnection } from "typeorm"
+import { MyContext } from "../types"
 
 @InputType()
 class PostInput {
@@ -72,18 +72,6 @@ export class PostResolver {
       replacements
     )
 
-    // const qb = getConnection()
-    //   .getRepository(Post)
-    //   .createQueryBuilder("p")
-    //   .innerJoinAndSelect("p.creator", "user", 'user.id = p."creatorId"')
-    //   .orderBy('p."createdAt"', "DESC")
-    //   .take(realLimit + 1)
-
-    // if (cursor) {
-    //   qb.where('p."createdAt" < :cursor', { cursor: new Date(Number(cursor)) })
-    // }
-    // const posts = await qb.getMany()
-
     return {
       posts: posts.slice(0, realLimit),
       hasMore: posts.length === realLimit + 1,
@@ -125,6 +113,40 @@ export class PostResolver {
   @Mutation(() => Boolean)
   async deletePost(@Arg("id") id: number): Promise<Boolean> {
     await Post.delete(id)
+    return true
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async vote(
+    @Arg("postId", () => Int) postId: number,
+    @Arg("value", () => Int) value: number,
+    @Ctx() { req }: MyContext
+  ) {
+    const isUpdoot = value !== -1
+    const realValue = isUpdoot ? 1 : -1
+    const { userId } = req.session!
+    // await Updoot.insert({
+    //   userId,
+    //   postId,
+    //   value: realValue,
+    // })
+
+    await getConnection().query(
+      `
+    START TRANSACTION;
+    
+    insert into updoot ("userId", "postId", "value")
+    values(${userId}, ${postId}, ${realValue});
+    
+    update post
+    set points = points + ${realValue}
+    where id = ${postId};
+
+    COMMIT;
+    `
+    )
+
     return true
   }
 }
