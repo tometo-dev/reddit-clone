@@ -48,16 +48,41 @@ export class PostResolver {
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit)
 
-    const qb = getConnection()
-      .getRepository(Post)
-      .createQueryBuilder("p")
-      .orderBy('"createdAt"', "DESC")
-      .take(realLimit + 1)
-
+    const replacements: any[] = [realLimit + 1]
     if (cursor) {
-      qb.where('"createdAt" < :cursor', { cursor: new Date(Number(cursor)) })
+      replacements.push(new Date(Number(cursor)))
     }
-    const posts = await qb.getMany()
+
+    const posts = await getConnection().query(
+      `
+      select p.*,
+      json_build_object(
+        'id', u.id,
+        'username', u.username,
+        'email', u.email,
+        'createdAt', u."createdAt",
+        'updatedAt', u."updatedAt"
+        ) creator
+      from post p
+      inner join public.user u on u.id = p."creatorId"
+      ${cursor ? `where p."createdAt" < $2` : ""}
+      order by p."createdAt" DESC
+      limit $1
+    `,
+      replacements
+    )
+
+    // const qb = getConnection()
+    //   .getRepository(Post)
+    //   .createQueryBuilder("p")
+    //   .innerJoinAndSelect("p.creator", "user", 'user.id = p."creatorId"')
+    //   .orderBy('p."createdAt"', "DESC")
+    //   .take(realLimit + 1)
+
+    // if (cursor) {
+    //   qb.where('p."createdAt" < :cursor', { cursor: new Date(Number(cursor)) })
+    // }
+    // const posts = await qb.getMany()
 
     return {
       posts: posts.slice(0, realLimit),

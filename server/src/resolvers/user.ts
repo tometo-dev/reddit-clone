@@ -3,11 +3,13 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   InputType,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
 } from "type-graphql"
 import { getConnection } from "typeorm"
 import { v4 } from "uuid"
@@ -44,8 +46,20 @@ class UserResponse {
   user?: User
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: MyContext) {
+    // this is the current user and
+    // it's okay to show them their own email
+    if (req.session!.userId === user.id) {
+      return user.email
+    } else {
+      // current user wants to see another user's email
+      return ""
+    }
+  }
+
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req }: MyContext): Promise<User | undefined> {
     // user not logged in
