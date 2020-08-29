@@ -32,9 +32,9 @@ const Index = () => {
         <Box>Something went wrong</Box>
       ) : (
         <Stack spacing={8}>
-          {data!.posts.posts?.map((post) => (
-            <PostItem post={post} />
-          ))}
+          {data!.posts.posts?.map((post) =>
+            !post ? null : <PostItem post={post} />
+          )}
         </Stack>
       )}
       {data ? (

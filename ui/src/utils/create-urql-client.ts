@@ -9,6 +9,7 @@ import {
 } from "urql"
 import { pipe, tap } from "wonka"
 import {
+  DeletePostMutationVariables,
   LoginMutation,
   LogoutMutation,
   MeDocument,
@@ -79,7 +80,6 @@ const cursorPagination = (): Resolver => {
 }
 
 export const createUrqlClient = (ssrExchange: any, ctx: any) => {
-
   let cookie = ""
   if (isServer()) {
     cookie = ctx?.req.headers.cookie
@@ -159,6 +159,12 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
 
               fieldInfos.forEach((fi) => {
                 cache.invalidate("Query", "posts", fi.arguments || {})
+              })
+            },
+            deletePost: (_result, args, cache, info) => {
+              cache.invalidate({
+                __typename: "Post",
+                id: (args as DeletePostMutationVariables).id,
               })
             },
             vote: (_result, args, cache, info) => {

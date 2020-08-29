@@ -1,7 +1,20 @@
-import { Box, Button, Flex, Heading, Icon, Link, Text } from "@chakra-ui/core"
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Icon,
+  IconButton,
+  Link,
+  Text,
+} from "@chakra-ui/core"
 import NextLink from "next/link"
 import React, { useState } from "react"
-import { PostSnippetFragment, useVoteMutation } from "../generated/graphql"
+import {
+  PostSnippetFragment,
+  useDeletePostMutation,
+  useVoteMutation,
+} from "../generated/graphql"
 
 interface PostItemProps {
   post: PostSnippetFragment
@@ -13,6 +26,7 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
   >("not-loading")
 
   const [_, vote] = useVoteMutation()
+  const [, deletePost] = useDeletePostMutation()
 
   return (
     <Box key={post.id} p={5} shadow="md" borderWidth="1px">
@@ -68,6 +82,16 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
           </NextLink>
           <Text>posted by: {post.creator.username}</Text>
           <Text mt={4}>{post.textSnippet}</Text>
+        </Box>
+        <Box flex={1}>
+          <IconButton
+            icon="delete"
+            aria-label="delete post"
+            variantColor="red"
+            onClick={() => {
+              deletePost({ id: post.id })
+            }}
+          />
         </Box>
       </Flex>
     </Box>
