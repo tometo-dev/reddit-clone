@@ -133,6 +133,22 @@ export const createUrqlClient = (ssrExchange: any) => ({
               })
             )
           },
+          createPost: (_result, args, cache, info) => {
+            /**
+             * Invalidate each post query.
+             * i.e. if "load more" has been done, this will invalidate
+             *    those subsequent queries from the cache too.
+             */
+
+            const allFields = cache.inspectFields("Query")
+            const fieldInfos = allFields.filter(
+              (info) => info.fieldName === "posts"
+            )
+
+            fieldInfos.forEach((fi) => {
+              cache.invalidate("Query", "posts", fi.arguments || {})
+            })
+          },
         },
       },
     }),
