@@ -26,17 +26,10 @@ const Index = () => {
 
   return (
     <Layout>
-      <Flex alignItems="center">
-        <Heading>Reddit Clone</Heading>
-        <NextLink href="/create-post">
-          <Link ml="auto">create post</Link>
-        </NextLink>
-      </Flex>
-      <br />
       {fetching && !data ? (
-        <div>Loading...</div>
+        <Box>Loading...</Box>
       ) : !fetching && !data ? (
-        <div>Something went wrong</div>
+        <Box>Something went wrong</Box>
       ) : (
         <Stack spacing={8}>
           {data!.posts.posts?.map((post) => (

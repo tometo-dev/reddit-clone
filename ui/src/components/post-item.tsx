@@ -1,4 +1,5 @@
-import { Box, Button, Flex, Heading, Icon, Text } from "@chakra-ui/core"
+import { Box, Button, Flex, Heading, Icon, Link, Text } from "@chakra-ui/core"
+import NextLink from "next/link"
 import React, { useState } from "react"
 import { PostSnippetFragment, useVoteMutation } from "../generated/graphql"
 
@@ -60,7 +61,11 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
           </Flex>
         </Box>
         <Box flex={9}>
-          <Heading fontSize="xl">{post.title}</Heading>
+          <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+            <Link>
+              <Heading fontSize="xl">{post.title}</Heading>
+            </Link>
+          </NextLink>
           <Text>posted by: {post.creator.username}</Text>
           <Text mt={4}>{post.textSnippet}</Text>
         </Box>
