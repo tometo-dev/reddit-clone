@@ -21,6 +21,9 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
             <Button
               aria-label="upvote"
               onClick={async () => {
+                if (post.voteStatus === 1) {
+                  return
+                }
                 setLoadingState("upvote-loading")
                 await vote({
                   value: 1,
@@ -29,6 +32,7 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
                 setLoadingState("not-loading")
               }}
               isLoading={loadingState === "upvote-loading"}
+              variantColor={post.voteStatus === 1 ? "green" : undefined}
             >
               <Icon name="chevron-up" size="2rem" />
             </Button>
@@ -36,6 +40,9 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
             <Button
               aria-label="downvote"
               onClick={async () => {
+                if (post.voteStatus === -1) {
+                  return
+                }
                 setLoadingState("downvote-loading")
                 await vote({
                   value: -1,
@@ -44,6 +51,7 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
                 setLoadingState("not-loading")
               }}
               isLoading={loadingState === "downvote-loading"}
+              variantColor={post.voteStatus === -1 ? "red" : undefined}
             >
               <Icon name="chevron-down" size="2rem" />
             </Button>
