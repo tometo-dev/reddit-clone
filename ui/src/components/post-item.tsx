@@ -19,6 +19,7 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
         <Box flex={1} mr="1rem">
           <Flex direction="column" alignItems="center">
             <Button
+              key="upvote-button"
               aria-label="upvote"
               onClick={async () => {
                 if (post.voteStatus === 1) {
@@ -38,6 +39,7 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
             </Button>
             <Text>{post.points}</Text>
             <Button
+              key="downvote-button"
               aria-label="downvote"
               onClick={async () => {
                 if (post.voteStatus === -1) {
