@@ -1,23 +1,14 @@
 import { Box, Heading, Text } from "@chakra-ui/core"
 import { withUrqlClient } from "next-urql"
-import { useRouter } from "next/router"
 import React from "react"
 import { Layout } from "../../components/layout"
-import { usePostQuery } from "../../generated/graphql"
 import { createUrqlClient } from "../../utils/create-urql-client"
+import { useGetPostFromUrl } from "../../utils/use-getPostFromUrl"
 
 const Post = ({}) => {
-  const router = useRouter()
-  const intId =
-    typeof router.query.id === "string" ? Number(router.query.id) : -1
-  const [{ data, fetching }] = usePostQuery({
-    pause: intId === -1,
-    variables: {
-      id: intId,
-    },
-  })
+  const [{ data, fetching }] = useGetPostFromUrl()
 
-  console.log({ data })
+  // console.log({ data })
 
   if (fetching) {
     return (

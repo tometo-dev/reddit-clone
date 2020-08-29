@@ -13,6 +13,7 @@ import React, { useState } from "react"
 import {
   PostSnippetFragment,
   useDeletePostMutation,
+  useMeQuery,
   useVoteMutation,
 } from "../generated/graphql"
 
@@ -27,6 +28,7 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
 
   const [_, vote] = useVoteMutation()
   const [, deletePost] = useDeletePostMutation()
+  const [{ data }] = useMeQuery()
 
   return (
     <Box key={post.id} p={5} shadow="md" borderWidth="1px">
@@ -84,14 +86,25 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
           <Text mt={4}>{post.textSnippet}</Text>
         </Box>
         <Box flex={1}>
-          <IconButton
-            icon="delete"
-            aria-label="delete post"
-            variantColor="red"
-            onClick={() => {
-              deletePost({ id: post.id })
-            }}
-          />
+          {data?.me?.id === post.creator.id ? (
+            <Flex>
+              <NextLink href="/post/edit/[id]" as={`/post/edit/${post.id}`}>
+                <IconButton
+                  icon="edit"
+                  aria-label="edit post"
+                  mr={2}
+                  as={Link}
+                />
+              </NextLink>
+              <IconButton
+                icon="delete"
+                aria-label="delete post"
+                onClick={() => {
+                  deletePost({ id: post.id })
+                }}
+              />
+            </Flex>
+          ) : null}
         </Box>
       </Flex>
     </Box>
