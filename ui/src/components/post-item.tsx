@@ -1,21 +1,8 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Icon,
-  IconButton,
-  Link,
-  Text,
-} from "@chakra-ui/core"
+import { Box, Button, Flex, Heading, Icon, Link, Text } from "@chakra-ui/core"
 import NextLink from "next/link"
 import React, { useState } from "react"
-import {
-  PostSnippetFragment,
-  useDeletePostMutation,
-  useMeQuery,
-  useVoteMutation,
-} from "../generated/graphql"
+import { PostSnippetFragment, useVoteMutation } from "../generated/graphql"
+import { EditDeletePostButtons } from "./edit-delete-post-buttons"
 
 interface PostItemProps {
   post: PostSnippetFragment
@@ -27,8 +14,6 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
   >("not-loading")
 
   const [_, vote] = useVoteMutation()
-  const [, deletePost] = useDeletePostMutation()
-  const [{ data }] = useMeQuery()
 
   return (
     <Box key={post.id} p={5} shadow="md" borderWidth="1px">
@@ -86,25 +71,7 @@ export const PostItem: React.FC<PostItemProps> = ({ post }) => {
           <Text mt={4}>{post.textSnippet}</Text>
         </Box>
         <Box flex={1}>
-          {data?.me?.id === post.creator.id ? (
-            <Flex>
-              <NextLink href="/post/edit/[id]" as={`/post/edit/${post.id}`}>
-                <IconButton
-                  icon="edit"
-                  aria-label="edit post"
-                  mr={2}
-                  as={Link}
-                />
-              </NextLink>
-              <IconButton
-                icon="delete"
-                aria-label="delete post"
-                onClick={() => {
-                  deletePost({ id: post.id })
-                }}
-              />
-            </Flex>
-          ) : null}
+          <EditDeletePostButtons id={post.id} creatorId={post.creator.id} />
         </Box>
       </Flex>
     </Box>
