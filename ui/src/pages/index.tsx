@@ -22,14 +22,17 @@ const Index = () => {
     cursor: null as null | string,
   })
 
-  const [{ data, fetching }] = usePostsQuery({ variables })
+  const [{ data, error, fetching }] = usePostsQuery({ variables })
 
   return (
     <Layout>
       {fetching && !data ? (
         <Box>Loading...</Box>
       ) : !fetching && !data ? (
-        <Box>Something went wrong</Box>
+        <Box>
+          <Box>Something went wrong</Box>
+          <Box>{error?.message}</Box>
+        </Box>
       ) : (
         <Stack spacing={8}>
           {data!.posts.posts?.map((post) =>

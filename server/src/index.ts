@@ -16,6 +16,8 @@ import { User } from "./entities/User"
 import { Post } from "./entities/Post"
 import dotenv from "dotenv"
 import { Updoot } from "./entities/Updoot"
+import { createUserLoader } from "./utils/create-user-loader"
+import { createUpdootLoader } from "./utils/create-updoot-loader"
 
 dotenv.config()
 
@@ -67,7 +69,13 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): MyContext => ({ req, res, redis }),
+    context: ({ req, res }): MyContext => ({
+      req,
+      res,
+      redis,
+      userLoader: createUserLoader(),
+      updootLoader: createUpdootLoader(),
+    }),
   })
 
   apolloServer.applyMiddleware({
