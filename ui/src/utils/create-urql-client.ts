@@ -1,4 +1,4 @@
-import { cacheExchange, Resolver } from "@urql/exchange-graphcache"
+import { cacheExchange, Resolver, Cache } from "@urql/exchange-graphcache"
 import gql from "graphql-tag"
 import Router from "next/router"
 import {
@@ -79,6 +79,21 @@ const cursorPagination = (): Resolver => {
   }
 }
 
+const invalidateAllPosts = (cache: Cache) => {
+  /**
+   * Invalidate each post query.
+   * i.e. if "load more" has been done, this will invalidate
+   *    those subsequent queries from the cache too.
+   */
+
+  const allFields = cache.inspectFields("Query")
+  const fieldInfos = allFields.filter((info) => info.fieldName === "posts")
+
+  fieldInfos.forEach((fi) => {
+    cache.invalidate("Query", "posts", fi.arguments || {})
+  })
+}
+
 export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   let cookie = ""
   if (isServer()) {
@@ -118,6 +133,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                   }
                 }
               )
+              invalidateAllPosts(cache)
             },
             register: (_result, args, cache, info) => {
               customUpdateQuery<RegisterMutation, MeQuery>(
@@ -146,20 +162,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
               )
             },
             createPost: (_result, args, cache, info) => {
-              /**
-               * Invalidate each post query.
-               * i.e. if "load more" has been done, this will invalidate
-               *    those subsequent queries from the cache too.
-               */
-
-              const allFields = cache.inspectFields("Query")
-              const fieldInfos = allFields.filter(
-                (info) => info.fieldName === "posts"
-              )
-
-              fieldInfos.forEach((fi) => {
-                cache.invalidate("Query", "posts", fi.arguments || {})
-              })
+              invalidateAllPosts(cache)
             },
             deletePost: (_result, args, cache, info) => {
               cache.invalidate({
