@@ -16,27 +16,27 @@ services:
       - "6379:6379"
     container_name: reddit-clone-redis
 
-  backend:
-    build:
-      context: ./server
-    image: "reddit-clone-backend"
-    env_file:
-      - ./.env.server.production
-    depends_on:
-      - "database"
-      - "redis"
-    ports:
-      - "4000:4000"
-    container_name: reddit-clone-backend
+  # backend:
+  #   build:
+  #     context: ./server
+  #   image: "reddit-clone-backend"
+  #   env_file:
+  #     - ./.env.server.production
+  #   depends_on:
+  #     - "database"
+  #     - "redis"
+  #   ports:
+  #     - "4000:4000"
+  #   container_name: reddit-clone-backend
 
-  frontend:
-    build:
-      context: ./ui
-    image: "reddit-clone-frontend"
-    env_file: 
-      - ./.env.ui.production
-    depends_on:
-      - "backend"
-    ports: 
-      - "3000:3000"
-    container_name: reddit-clone-frontend
+  # frontend:
+  #   build:
+  #     context: ./ui
+  #   image: "reddit-clone-frontend"
+  #   env_file: 
+  #     - ./.env.ui.production
+  #   depends_on:
+  #     - "backend"
+  #   ports: 
+  #     - "3000:3000"
+  #   container_name: reddit-clone-frontend

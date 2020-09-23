@@ -1,48 +1,48 @@
 import { ApolloServer } from "apollo-server-express"
 import connectRedis from "connect-redis"
 import cors from "cors"
+import "dotenv-safe/config"
 import express from "express"
 import session from "express-session"
 import Redis from "ioredis"
+import path from "path"
 import "reflect-metadata"
 import { buildSchema } from "type-graphql"
-import { COOKIE_NAME } from "./constants"
+import { createConnection } from "typeorm"
+import { COOKIE_NAME, __prod__ } from "./constants"
+import { Post } from "./entities/Post"
+import { Updoot } from "./entities/Updoot"
+import { User } from "./entities/User"
 import { HelloResolver } from "./resolvers/hello"
 import { PostResolver } from "./resolvers/posts"
 import { UserResolver } from "./resolvers/user"
 import { MyContext } from "./types"
-import { createConnection } from "typeorm"
-import { User } from "./entities/User"
-import { Post } from "./entities/Post"
-import dotenv from "dotenv"
-import { Updoot } from "./entities/Updoot"
-import { createUserLoader } from "./utils/create-user-loader"
 import { createUpdootLoader } from "./utils/create-updoot-loader"
-
-dotenv.config()
+import { createUserLoader } from "./utils/create-user-loader"
 
 const main = async () => {
-  await createConnection({
+  const conn = await createConnection({
     type: "postgres",
-    database: process.env.POSTGRES_DB,
-    username: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    host: process.env.POSTGRES_HOST,
+    url: process.env.DATABASE_URL,
     logging: true,
-    synchronize: true,
+    // synchronize: true,
+    migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, Post, Updoot],
   })
+
+  // run db migrations when server starts
+  await conn.runMigrations()
 
   const app = express()
 
   const RedisStore = connectRedis(session)
-  const redis = new Redis({ host: process.env.REDIS_HOST })
+  const redis = new Redis(process.env.REDIS_URL)
 
   app.set("trust proxy", 1)
 
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: process.env.CORS_ORIGIN,
       credentials: true,
     })
   )
@@ -54,14 +54,15 @@ const main = async () => {
         client: redis,
         disableTouch: true,
       }),
-      secret: process.env.SESSION_SECRET as string,
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
-        secure: false,
+        secure: __prod__,
         sameSite: "lax",
+        domain: __prod__ ? ".sudhanshu-ranjan.tech" : undefined,
       },
     })
   )
@@ -85,7 +86,7 @@ const main = async () => {
     cors: false,
   })
 
-  app.listen(4000, () => {
+  app.listen(Number(process.env.PORT), () => {
     console.log("server started on localhost:4000")
   })
 }
