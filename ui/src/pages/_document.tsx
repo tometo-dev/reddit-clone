@@ -16,7 +16,8 @@ class MyDocument extends Document {
     return (
       <Html>
         <Head>
-        <link rel="shortcut icon" href="/favicon.png" />
+          <link rel="shortcut icon" href="/favicon.png" />
+          <title>reddit clone: not the front page of the internet</title>
         </Head>
         <body>
           <Main />
