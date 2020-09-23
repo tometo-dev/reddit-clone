@@ -1,9 +1,10 @@
-FROM node:12.2.0
+FROM node:12
 WORKDIR /app
+COPY package.json .
+COPY yarn.lock .
+RUN yarn
 COPY . .
-RUN npm install -g -s yarn@1.x && \
-  yarn && \
-  yarn run build && \
-  yarn cache clean
+RUN yarn run build
 
-CMD [ "yarn", "start" ]
+ENV NODE_ENV production
+CMD [ "node", "dist/index.js" ]
